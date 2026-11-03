@@ -1,0 +1,263 @@
+<title>Nền Đắp Trên Đất Yếu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Bố cục: sổ tính địa kỹ thuật — cột tham số bên trái, mặt cắt + kết quả + thuyết minh bên phải */
+:root{
+  --bg:#eef2f1; --panel:#ffffff; --panel2:#f6f8f7; --ink:#16211f; --muted:#5a6966; --line:#d3dbd9;
+  --accent:#1d5bbf; --accent-soft:#e3ecfa; --on-accent:#ffffff;
+  --ok:#23784a; --ok-soft:#e1f2e8; --bad:#bf3326; --bad-soft:#fbe6e3; --warn:#a8670f; --warn-soft:#fbefdc;
+  --fill:#d9c48f; --fill-edge:#9c8550; --blanket:#e9dcae;
+  --s0:#8f9c8e; --s1:#a5a98d; --s2:#b8ae8e; --s3:#9b8f79; --s4:#8d978f; --firm:#c7c3b3;
+  --water:#2f7fc4; --pvd:#1d5bbf; --pile:#e5c55e; --pile-edge:#9a7d1c;
+  --c-none:#7b8784; --c-pvd:#1d5bbf; --c-sand:#b2721a; --geo:#178062;
+  --f-display:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1514; --panel:#172020; --panel2:#1c2625; --ink:#e3eae8; --muted:#94a3a0; --line:#2c3836;
+  --accent:#7aa5f2; --accent-soft:#1f2c44; --on-accent:#0d1626;
+  --ok:#62c48d; --ok-soft:#173025; --bad:#f07466; --bad-soft:#3a1d1a; --warn:#e6ab52; --warn-soft:#352813;
+  --fill:#8a7a52; --fill-edge:#b9a46c; --blanket:#6f6447;
+  --s0:#4d5a52; --s1:#5b604e; --s2:#675f4d; --s3:#594f42; --s4:#4c5650; --firm:#4a4840;
+  --water:#62a8e4; --pvd:#8fb3f5; --pile:#c9aa45; --pile-edge:#e8cf7a;
+  --c-none:#9aa7a4; --c-pvd:#7aa5f2; --c-sand:#e0a24a; --geo:#4fc79c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1514; --panel:#172020; --panel2:#1c2625; --ink:#e3eae8; --muted:#94a3a0; --line:#2c3836;
+  --accent:#7aa5f2; --accent-soft:#1f2c44; --on-accent:#0d1626;
+  --ok:#62c48d; --ok-soft:#173025; --bad:#f07466; --bad-soft:#3a1d1a; --warn:#e6ab52; --warn-soft:#352813;
+  --fill:#8a7a52; --fill-edge:#b9a46c; --blanket:#6f6447;
+  --s0:#4d5a52; --s1:#5b604e; --s2:#675f4d; --s3:#594f42; --s4:#4c5650; --firm:#4a4840;
+  --water:#62a8e4; --pvd:#8fb3f5; --pile:#c9aa45; --pile-edge:#e8cf7a;
+  --c-none:#9aa7a4; --c-pvd:#7aa5f2; --c-sand:#e0a24a; --geo:#4fc79c; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{border-bottom:1px solid var(--line);background:var(--panel)}
+header .in{max-width:1480px;margin:0 auto;padding-block:18px 16px;display:flex;flex-wrap:wrap;gap:8px 24px;align-items:baseline;justify-content:space-between}
+header h1{font-size:clamp(22px,3vw,30px);letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--muted);max-width:70ch}
+.std{font:500 12px/1.4 var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.wrap{max-width:1480px;margin:0 auto;padding-block:18px 40px;display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:960px){.wrap{grid-template-columns:minmax(0,1fr)}}
+aside{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media (min-width:961px){aside{position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding-right:4px}}
+main{display:flex;flex-direction:column;gap:18px;min-width:0}
+
+.grp{background:var(--panel);border:1px solid var(--line);border-radius:10px}
+.grp>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;gap:10px;align-items:baseline;font:600 15px/1.3 var(--f-display)}
+.grp>summary::-webkit-details-marker{display:none}
+.grp>summary .no{font:500 12px var(--f-mono);color:var(--accent)}
+.grp>summary::after{content:"+";margin-left:auto;color:var(--muted);font-family:var(--f-mono)}
+.grp[open]>summary::after{content:"−"}
+.grp .body{padding:0 14px 14px;display:flex;flex-direction:column;gap:10px}
+.sl{display:flex;flex-direction:column;gap:2px}
+.sl label{display:flex;justify-content:space-between;gap:8px;font-size:13px;color:var(--muted)}
+.sl label .sy{font:500 12.5px var(--f-mono);color:var(--ink)}
+.ctl{display:flex;align-items:center;gap:8px}
+.ctl input[type=range]{flex:1;min-width:0;accent-color:var(--accent);height:22px}
+.ctl input[type=number]{width:74px;font:500 13px var(--f-mono);padding:3px 6px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+.ctl .un{width:52px;font:12px var(--f-mono);color:var(--muted)}
+.chk{display:flex;gap:8px;align-items:flex-start;font-size:13.5px}
+.chk input{accent-color:var(--accent);margin-top:3px}
+.sel{display:flex;flex-direction:column;gap:3px;font-size:13px;color:var(--muted)}
+select,input[type=text]{font:14px var(--f-body);padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--panel2);color:var(--ink);width:100%}
+.hint{font-size:12.5px;color:var(--muted);margin:0}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{font:600 13px var(--f-body);padding:9px 4px;border:0;background:var(--panel2);color:var(--ink);cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.layer{border:1px solid var(--line);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:8px;background:var(--panel2)}
+.layer .lh{display:flex;gap:8px;align-items:center}
+.layer .sw{width:14px;height:14px;border-radius:3px;flex:none;border:1px solid var(--line)}
+.layer .lh input{font-weight:600}
+.btn{font:600 13px var(--f-body);padding:7px 12px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.btn.ghost{padding:4px 8px;color:var(--bad);flex:none}
+.btn.add{border-style:dashed;color:var(--accent)}
+.sub{font:600 12px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.card h2{font-size:18px;margin-bottom:4px}
+.card .cap{color:var(--muted);font-size:13.5px;margin:0 0 10px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.kpi{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panel);display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi .k{font-size:12.5px;color:var(--muted)}
+.kpi .v{font:600 24px/1.15 var(--f-mono);font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:13px;font-weight:400;color:var(--muted)}
+.kpi .d{font-size:12.5px;color:var(--muted)}
+.pill{display:inline-block;font:600 11.5px var(--f-body);padding:2px 8px;border-radius:99px;margin-top:2px;align-self:flex-start}
+.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.warn{background:var(--warn-soft);color:var(--warn)}
+.kpi.bad{border-color:var(--bad)}
+.headline{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:baseline;margin-bottom:12px}
+.headline h2{font-size:20px}
+.headline .m{font:500 13px var(--f-mono);color:var(--muted)}
+.svgwrap{overflow-x:auto}
+svg text{font-family:var(--f-body)}
+#sec{width:100%;min-width:640px;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:18px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+@media (max-width:1100px){.two{grid-template-columns:minmax(0,1fr)}}
+.chart{width:100%;height:auto;display:block}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{padding:7px 9px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th{font-weight:600;color:var(--muted);font-size:12.5px;background:var(--panel2)}
+th:first-child,td:first-child{text-align:left}
+tr.cur td{background:var(--accent-soft)}
+td.num{font-family:var(--f-mono)}
+.ex{border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.ex>summary{cursor:pointer;padding:14px 16px;font:600 16px/1.3 var(--f-display);list-style:none;display:flex;gap:10px;align-items:baseline}
+.ex>summary::-webkit-details-marker{display:none}
+.ex>summary .no{font:500 12px var(--f-mono);color:var(--accent)}
+.ex>summary::after{content:"+";margin-left:auto;color:var(--muted);font-family:var(--f-mono)}
+.ex[open]>summary::after{content:"−"}
+.ex .body{padding:0 16px 16px;max-width:none}
+.ex p,.ex li{max-width:78ch}
+.ex h3{font-size:14.5px;margin:16px 0 6px}
+.f{font:500 14px/1.7 var(--f-mono);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto;white-space:pre;margin:8px 0}
+.steps{counter-reset:st;list-style:none;padding:0;margin:8px 0;display:flex;flex-direction:column;gap:8px}
+.steps>li{counter-increment:st;position:relative;padding-left:34px}
+.steps>li::before{content:counter(st);position:absolute;left:0;top:1px;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font:600 12px/22px var(--f-mono);text-align:center}
+.calc{font:14px/1.7 var(--f-mono);overflow-x:auto;white-space:pre;display:block;color:var(--ink)}
+.note{font-size:13px;color:var(--muted)}
+.inline-sel{display:inline-block;width:auto;min-width:220px;margin-left:6px}
+footer{border-top:1px solid var(--line);color:var(--muted);font-size:13px}
+footer .in{max-width:1480px;margin:0 auto;padding-block:16px 24px}
+.busy{opacity:.6;transition:opacity .15s}
+@media (prefers-reduced-motion:reduce){.busy{transition:none}}
+
+.more{border-top:1px dashed var(--line);padding-top:6px}
+.more>summary{cursor:pointer;font-size:13px;color:var(--accent);list-style:none;padding:2px 0}
+.more>summary::-webkit-details-marker{display:none}
+.more>summary::before{content:"▸ ";}
+.more[open]>summary::before{content:"▾ ";}
+.more>.in{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.verdict{margin:0 0 12px;font-size:14.5px;max-width:80ch}
+.verdict b.ok{color:var(--ok)} .verdict b.bad{color:var(--bad)}
+.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent);padding:10px 16px;font-size:14px}
+.btn.primary:disabled{opacity:.6;cursor:progress}
+.exp{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:10px}
+.exp .st{font-size:13px;color:var(--muted)}
+.howto{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:85ch}
+.howto li{font-size:14px}
+/* Bản thuyết minh in ra PDF: luôn nền trắng, chụp ngoài màn hình */
+.geo{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:10px}
+#wm{position:fixed;inset:0;pointer-events:none;z-index:40;background-repeat:repeat;opacity:.07}
+@media print{#wm{opacity:.1}}
+#report{position:absolute;left:-12000px;top:0;width:714px;background:#ffffff;color:#16211f;font:12.5px/1.55 'IBM Plex Sans',Arial,sans-serif;padding:0}
+#report h1{font:700 19px/1.3 'Be Vietnam Pro',Arial,sans-serif;margin:0 0 4px;color:#16211f;text-align:center;text-transform:uppercase}
+#report .rsub{text-align:center;color:#4b5a57;margin:0 0 14px}
+#report h2{font:700 14.5px/1.3 'Be Vietnam Pro',Arial,sans-serif;margin:18px 0 6px;padding-bottom:4px;border-bottom:1.5px solid #16211f;color:#16211f}
+#report h3{font:600 13px/1.3 'Be Vietnam Pro',Arial,sans-serif;margin:12px 0 4px;color:#16211f}
+#report p{margin:4px 0}
+#report table{width:100%;border-collapse:collapse;font-size:11.5px;margin:4px 0 6px}
+#report th,#report td{border:1px solid #b9c3c1;padding:3px 5px;text-align:right;white-space:nowrap;color:#16211f;background:#ffffff}
+#report th{background:#eef2f1;font-weight:600}
+#report th:first-child,#report td:first-child{text-align:left}
+#report td.l{text-align:left;white-space:normal}
+#report .f{font:11.5px/1.6 'IBM Plex Mono',Consolas,monospace;background:#f4f6f5;border:1px solid #d3dbd9;border-radius:4px;padding:6px 8px;white-space:pre;margin:5px 0;color:#16211f}
+#report .calc{font:11.5px/1.65 'IBM Plex Mono',Consolas,monospace;white-space:pre;display:block;margin:3px 0 6px;color:#16211f}
+#report img{display:block;width:100%;height:auto;margin:6px 0}
+#report .fig{font-size:11px;color:#4b5a57;text-align:center;margin:0 0 6px}
+#report ol,#report ul{margin:4px 0;padding-left:20px}
+#report li{margin:2px 0}
+#report .ok{color:#23784a;font-weight:600} #report .bad{color:#bf3326;font-weight:600}
+#report .sign{margin-top:20px;display:flex;justify-content:space-between;font-size:12px;color:#16211f}
+</style>
+
+<header><div class="in gut">
+  <div>
+    <div class="std">Địa kỹ thuật nền đường · 22TCN 262-2000 · TCVN 9355:2012</div>
+    <h1>Nền đắp trên đất yếu</h1>
+    <p>Kéo các thanh trượt để thay đổi nền đắp, địa chất và giải pháp xử lý. Kết quả cập nhật ngay; thuyết minh tính toán chi tiết xuất ra file PDF.</p>
+  </div>
+</div></header>
+
+<div class="wrap gut">
+<aside id="ctrl">
+  <details class="grp" open><summary><span class="no">01</span>Nền đắp &amp; tải trọng</summary><div class="body" id="g-emb"></div></details>
+  <details class="grp" open><summary><span class="no">02</span>Các lớp đất yếu</summary><div class="body">
+    <p class="hint">Mực nước ngầm ở mặt đất tự nhiên. Dưới lớp cuối cùng là đất chặt.</p>
+    <div id="layers" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button class="btn add" id="addLayer" type="button">+ Thêm lớp đất yếu</button>
+    <div id="g-drain"></div>
+  </div></details>
+  <details class="grp" open><summary><span class="no">03</span>Giải pháp xử lý</summary><div class="body">
+    <div class="seg" role="group" aria-label="Chọn giải pháp">
+      <button type="button" data-m="none" id="m-none">Không xử lý</button>
+      <button type="button" data-m="pvd" id="m-pvd">Bấc thấm</button>
+      <button type="button" data-m="sand" id="m-sand">Cọc cát</button>
+    </div>
+    <div id="g-L"></div>
+    <div id="g-pvd"></div>
+    <div id="g-sand"></div>
+    <div id="g-geo" class="geo"></div>
+  </div></details>
+  <details class="grp" open><summary><span class="no">04</span>Thời gian &amp; tiêu chuẩn</summary><div class="body" id="g-time"></div></details>
+</aside>
+
+<main id="out">
+  <section class="card">
+    <div class="headline"><h2 id="hd-title">Kết quả</h2><span class="m" id="hd-meta"></span></div>
+    <p class="verdict" id="verdict"></p>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section class="card">
+    <h2>Mặt cắt ngang và cung trượt nguy hiểm</h2>
+    <p class="cap" id="sec-cap"></p>
+    <div class="svgwrap"><svg id="sec" role="img" aria-label="Mặt cắt ngang nền đắp và các lớp đất yếu"></svg></div>
+    <div class="legend" id="sec-legend"></div>
+  </section>
+
+  <section class="card two">
+    <div style="min-width:0">
+      <h2>Lún theo thời gian</h2>
+      <p class="cap">Độ lún tại tim nền đắp. Đường đứng là thời điểm làm mặt đường.</p>
+      <svg id="ch-s" class="chart" viewBox="0 0 560 300" role="img" aria-label="Biểu đồ lún theo thời gian"></svg>
+      <div class="legend" id="lg-s"></div>
+    </div>
+    <div style="min-width:0">
+      <h2>Hệ số ổn định theo thời gian</h2>
+      <p class="cap" id="cap-fs"></p>
+      <svg id="ch-f" class="chart" viewBox="0 0 560 300" role="img" aria-label="Biểu đồ hệ số ổn định theo thời gian"></svg>
+      <div class="legend" id="lg-f"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>So sánh ba phương án</h2>
+    <div class="tbl"><table id="cmp"></table></div>
+    <p class="note" id="smax"></p>
+  </section>
+
+  <section class="card">
+    <h2>Thuyết minh tính toán</h2>
+    <p class="cap">Tóm tắt cách tính. Toàn bộ công thức, số liệu thay vào và bảng tính từng mảnh trượt, từng phân lớp nằm trong file PDF.</p>
+    <ul class="howto">
+      <li><b>Ổn định:</b> Bishop đơn giản, cung tròn. Đất yếu dùng cu (cắt cánh), cu tăng dần khi đất cố kết. Cọc cát tính theo sức chống cắt hỗn hợp. Vải địa đáy nền đắp góp thêm mô men giữ T·(yO − yv), T lấy nhỏ nhất giữa cường độ thiết kế và sức kháng nhổ.</li>
+      <li><b>Tổng độ lún:</b> cộng lún các phân lớp 0,5 m tại tim nền đắp theo Cc, Cs, σ′p; nhân hệ số kinh nghiệm m.</li>
+      <li><b>Lún theo thời gian:</b> thấm đứng Terzaghi + thấm ngang vào bấc/cọc cát (Hansbo), có kể thời gian đắp. Lún dư so với 22TCN 262-2000.</li>
+    </ul>
+    <div class="exp">
+      <button class="btn primary" id="btnPdf" type="button">Tải thuyết minh PDF</button>
+      <span class="st" id="pdfStatus" role="status">Theo phương án và số liệu đang chọn.</span>
+    </div>
+  </section>
+</main>
+</div>
+
+<footer><div class="in gut">TS. Đặng Minh Tân — Bộ môn Đường bộ – Sân bay, Khoa Công trình và Môi trường, Trường Đại học Giao thông Vận tải. Công cụ phục vụ giảng dạy và tính sơ bộ; hồ sơ thiết kế cần kiểm tra lại bằng phần mềm chuyên dụng và tiêu chuẩn hiện hành.</div></footer>
+
+<div id="report" aria-hidden="true"></div>
+<div id="wm" aria-hidden="true"></div>
+
+<script src="core.js"></script>
+<script src="app.js"></script>
