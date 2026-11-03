@@ -378,7 +378,7 @@ function rptSummary(){
 }
 function rptStab(img){
   const m = S.method, o = R[m], c = o.cTc;
-  let a = `<h2>3. Tính ổn định trượt</h2>
+  let a = `<h2 class="pb">3. Tính ổn định trượt</h2>
   <img src="${img}" alt=""><p class="fig">Hình 1. Mặt cắt ngang và cung trượt nguy hiểm nhất khi đắp xong (${MNAME[m]}).</p>
   <h3>3.1. Phương pháp</h3>
   <p>Ổn định được kiểm toán theo mặt trượt trụ tròn, phương pháp phân mảnh Bishop đơn giản. Khối trượt chia thành ${c?c.slices.length:30} mảnh thẳng đứng.</p>
@@ -443,7 +443,7 @@ function rptSettle(){
   const m = S.method, o = R[m];
   let si = 0, best = -1; M.subs.forEach((s,k)=>{ if (s.Sc > best){ best = s.Sc; si = k; } });
   const sb = M.subs[si], L = S.layers[sb.i], p0 = S.gf*S.H + (S.qSettle?S.q:0);
-  return `<h2>4. Tính độ lún cố kết</h2>
+  return `<h2 class="pb">4. Tính độ lún cố kết</h2>
   <h3>4.1. Ứng suất do nền đắp</h3>
   <p>Tải nền đắp hình thang: p = γđ·H${S.qSettle?' + q':''} = ${nf(p0,2)} kPa trên mặt đường, giảm tuyến tính về 0 tại chân taluy. Ứng suất thẳng đứng ở độ sâu z được tính bằng tích phân nghiệm Boussinesq – Flamant cho các dải tải (tương đương lời giải Osterberg):</p>
   <div class="f">Δσz(x, z) = ∫ 2·p(ξ)·z³ / [π·((x − ξ)² + z²)²] dξ</div>
@@ -469,7 +469,7 @@ ${sb.sf>sb.sp
 function rptTime(img){
   const m = S.method, o = R[m], dr = M.dr[m], tp = tpDays();
   const tEff = S.tc>0 && tp>=S.tc ? tp-S.tc/2 : tp, TvV = Tv(tEff), UvV = UvT(TvV);
-  let t = `<h2>5. Cố kết theo thời gian và lún dư</h2>
+  let t = `<h2 class="pb">5. Cố kết theo thời gian và lún dư</h2>
   <img src="${img}" alt=""><p class="fig">Hình 2. Độ lún theo thời gian tại tim nền đắp của ba phương án.</p>
   <h3>5.1. Công thức</h3>
   <div class="f">Thấm đứng (Terzaghi):   Tv = cv·t / Hdr²     Uv = 1 − Σ (2/M²)·exp(−M²·Tv),  M = π(2k+1)/2
@@ -510,7 +510,12 @@ function rptAssume(){
   <li>Thấm đứng nhiều lớp dùng chiều dày tương đương; bỏ qua sức cản giếng của bấc và lún thứ cấp; đất dưới chiều sâu L chỉ thấm đứng.</li>
   <li>Độ lún tính tại tim, chưa tính lặp phần đắp bù. Cọc cát: tỉ số n không đổi, bỏ qua hiệu ứng nén chặt khi thi công.</li>
   <li>Chưa xét bệ phản áp, vải địa kỹ thuật, gia tải trước, hút chân không.</li></ul>
-  <div class="sign"><span></span><span style="text-align:center">Người lập<br><br><br>TS. Đặng Minh Tân</span></div>`;
+  <p style="text-align:right;margin-top:14px"><i>Hà Nội, ngày ${new Date().getDate()} tháng ${new Date().getMonth()+1} năm ${new Date().getFullYear()}</i></p>
+  <div class="sign">
+    <div><b>NGƯỜI TÍNH</b><br><br><br><br>${esc(I.calc||'')}</div>
+    <div><b>NGƯỜI KIỂM TRA</b><br><br><br><br>${esc(I.check||'')}</div>
+    <div><b>CHỦ TRÌ THIẾT KẾ</b><br><br><br><br>${esc(I.lead||'')}</div>
+  </div>`;
 }
 
 let LIGHT = null;
@@ -536,22 +541,92 @@ function loadScript(src){
   return new Promise((res,rej)=>{ if (document.querySelector(`script[src="${src}"]`)) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load')); document.head.appendChild(s); });
 }
 
+/* ---------- thông tin hồ sơ ---------- */
+const INFO_FIELDS = [
+  ['org','Đơn vị lập','Bộ môn Đường bộ – Sân bay, Trường ĐH Giao thông Vận tải'],
+  ['project','Tên dự án',''],
+  ['work','Tên công trình',''],
+  ['item','Hạng mục','Nền đường đắp trên đất yếu'],
+  ['station','Lý trình / đoạn tuyến',''],
+  ['doc','Số hiệu hồ sơ',''],
+  ['calc','Người tính','TS. Đặng Minh Tân'],
+  ['check','Người kiểm tra',''],
+  ['lead','Chủ trì thiết kế','']
+];
+const I = {};
+let saved = {}; try { saved = JSON.parse(localStorage.getItem('ndy-info')||'{}') || {}; } catch(e){}
+INFO_FIELDS.forEach(([k,,d])=>{ I[k] = (k in saved) ? saved[k] : d; });
+(function(){
+  const box = $('#g-info');
+  INFO_FIELDS.forEach(([k,lb])=>{
+    const w = document.createElement('label'); w.className='sel';
+    w.innerHTML = `<span>${lb}</span><input type="text" id="info_${k}" value="${esc(I[k])}" placeholder="…">`;
+    w.querySelector('input').addEventListener('input', e=>{ I[k] = e.target.value; try { localStorage.setItem('ndy-info', JSON.stringify(I)); } catch(_){} });
+    box.appendChild(w);
+  });
+})();
+const dots = v => v && v.trim() ? esc(v) : '……………………………………';
+function reportHTML(imgSec, imgS){
+  const today = new Date().toLocaleDateString('vi-VN');
+  return `<table class="tb"><tbody>
+    <tr><td class="l" style="width:52%"><b>${dots(I.org).toUpperCase()}</b></td><td class="l" style="text-align:right">${I.doc?`Số hồ sơ: <b>${esc(I.doc)}</b>`:''}</td></tr>
+    <tr><td class="l" colspan="2">Dự án: <b>${dots(I.project)}</b></td></tr>
+    <tr><td class="l" colspan="2">Công trình: <b>${dots(I.work)}</b></td></tr>
+    <tr><td class="l">Hạng mục: <b>${dots(I.item)}</b></td><td class="l">Lý trình: <b>${dots(I.station)}</b></td></tr>
+  </tbody></table>
+  <h1>Thuyết minh tính toán nền đắp trên đất yếu</h1>
+  <p class="rsub">Phương án: <b>${MNAME[S.method]}${S.geo.on?' + vải địa kỹ thuật':''}</b> · H = ${nf(S.H,2)} m · đất yếu dày ${nf(M.D,2)} m · Người tính: ${dots(I.calc)} · Ngày lập: ${today}</p>
+  ${rptInput()}${rptSummary()}${rptStab(imgSec)}${rptSettle()}${rptTime(imgS)}${rptAssume()}`;
+}
+function pageStyle(){
+  const q = t => '"' + String(t||'').replace(/["\\]/g,' ').replace(/\s+/g,' ').trim() + '"';
+  const left = [I.project, I.work].filter(x=>x&&x.trim()).join(' — ') || 'Thuyết minh tính toán nền đắp trên đất yếu';
+  return `@page{size:A4 portrait;margin:18mm 14mm 16mm 22mm;
+    @top-left{content:${q(left)};font:8pt Arial,sans-serif;color:#555;vertical-align:bottom;padding-bottom:3mm}
+    @top-right{content:${q(I.item||'Nền đắp trên đất yếu')};font:8pt Arial,sans-serif;color:#555;vertical-align:bottom;padding-bottom:3mm}
+    @bottom-left{content:${q('Người tính: '+(I.calc||''))};font:8pt Arial,sans-serif;color:#555;vertical-align:top;padding-top:3mm}
+    @bottom-right{content:"Trang " counter(page) " / " counter(pages);font:8pt Arial,sans-serif;color:#555;vertical-align:top;padding-top:3mm}}`;
+}
+function printWatermarkSVG(){
+  const t = x => esc(x);
+  return `<svg class="pwm" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><pattern id="pwmp" width="420" height="230" patternUnits="userSpaceOnUse" patternTransform="rotate(-24)"><text x="210" y="110" text-anchor="middle" font-family="Be Vietnam Pro, Arial, sans-serif" font-size="20" font-weight="700" fill="#1b2b3a">${t(WM[0])}</text><text x="210" y="129" text-anchor="middle" font-family="IBM Plex Sans, Arial, sans-serif" font-size="11.5" fill="#1b2b3a">${t(WM[1])}</text></pattern></defs><rect width="100%" height="100%" fill="url(#pwmp)"/></svg>`;
+}
+async function printReport(){
+  const btn = $('#btnPdf'), st = $('#pdfStatus'), rep = $('#report');
+  btn.disabled = true; st.textContent = 'Đang chuẩn bị bản in…';
+  try {
+    const [imgSec, imgS] = await Promise.all([svgPng($('#sec')), svgPng($('#ch-s'))]);
+    rep.innerHTML = printWatermarkSVG() + reportHTML(imgSec, imgS);
+    $('#pagestyle').textContent = pageStyle();
+    if (document.fonts && document.fonts.ready) await document.fonts.ready;
+    await Promise.all([...rep.querySelectorAll('img')].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
+    document.documentElement.classList.add('printing');
+    const done = ()=>{ document.documentElement.classList.remove('printing'); rep.innerHTML=''; btn.disabled=false; window.removeEventListener('afterprint', done); };
+    window.addEventListener('afterprint', done);
+    st.textContent = 'Trong hộp thoại in: chọn “Lưu dưới dạng PDF”, khổ A4, tỉ lệ 100 %.';
+    setTimeout(()=>{ window.print(); setTimeout(()=>{ btn.disabled = false; }, 800); }, 60);
+  } catch(e){
+    st.textContent = 'Không chuẩn bị được bản in: ' + (e && e.message || e);
+    btn.disabled = false; document.documentElement.classList.remove('printing');
+  }
+}
+function onPrintClick(){
+  // Trong trình xem claude.ai lệnh in bị chặn → dùng cách tạo file PDF; mở trực tiếp (GitHub Pages, máy tính) → in bằng trình duyệt
+  if (window.claude && window.claude.use) exportPdf(); else printReport();
+}
 async function exportPdf(){
   const btn = $('#btnPdf'), st = $('#pdfStatus');
   btn.disabled = true; st.textContent = 'Đang lập thuyết minh…';
   const rep = $('#report');
   try {
     const dl = (window.claude && window.claude.use) ? await window.claude.use('downloads').catch(()=>null) : null;
-    if (!dl){ st.textContent = 'Chế độ xem này không cho tải file. Hãy mở trang trên claude.ai để tải PDF.'; return; }
+    if (!dl){ btn.disabled = false; return printReport(); }
     await Promise.all([
       loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
       loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
     ]);
     const [imgSec, imgS] = await Promise.all([svgPng($('#sec')), svgPng($('#ch-s'))]);
-    const today = new Date().toLocaleDateString('vi-VN');
-    rep.innerHTML = `<h1>Thuyết minh tính toán nền đắp trên đất yếu</h1>
-      <p class="rsub">Phương án: <b>${MNAME[S.method]}</b> · H = ${nf(S.H,2)} m · đất yếu dày ${nf(M.D,2)} m · Ngày lập: ${today}</p>
-      ${rptInput()}${rptSummary()}${rptStab(imgSec)}${rptSettle()}${rptTime(imgS)}${rptAssume()}`;
+    rep.innerHTML = reportHTML(imgSec, imgS);
     if (document.fonts && document.fonts.ready) await document.fonts.ready;
     await Promise.all([...rep.querySelectorAll('img')].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
     st.textContent = 'Đang dựng trang PDF…';
@@ -564,6 +639,7 @@ async function exportPdf(){
       cuts.add(Math.round(el.getBoundingClientRect().top - top0));
     });
     const cutArr = [...cuts].filter(x=>x>0).sort((a,b)=>a-b);
+    const forced = [...rep.querySelectorAll('.pb')].map(el=>Math.round(el.getBoundingClientRect().top - top0)).filter(x=>x>0);
     const scale = Math.min(2, 32000/total);
     const canvas = await html2canvas(rep, {scale, backgroundColor:'#ffffff', logging:false, scrollX:0, scrollY:0, windowWidth:1280});
     const {jsPDF} = window.jspdf;
@@ -572,6 +648,8 @@ async function exportPdf(){
     const ranges = []; let y = 0;
     while (y < total-2){
       let end = Math.min(total, y+pageH);
+      const fb = forced.filter(f=>f>y+5 && f<end);
+      if (fb.length){ end = fb[0]; ranges.push([y,end]); y = end; continue; }
       if (end < total){ const ok = cutArr.filter(c=>c>y+pageH*0.35 && c<=y+pageH); if (ok.length) end = ok[ok.length-1]; }
       ranges.push([y,end]); y = end;
     }
@@ -597,7 +675,7 @@ async function exportPdf(){
     rep.innerHTML = ''; btn.disabled = false;
   }
 }
-$('#btnPdf').addEventListener('click', exportPdf);
+$('#btnPdf').addEventListener('click', onPrintClick);
 
 /* ===================== HÌNH MỜ TÁC GIẢ ===================== */
 const WM = ['TS. Đặng Minh Tân', 'Bộ môn Đường bộ – Sân bay · Trường ĐH Giao thông Vận tải'];

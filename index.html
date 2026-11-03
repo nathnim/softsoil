@@ -150,7 +150,6 @@ footer .in{max-width:1480px;margin:0 auto;padding-block:16px 24px}
 /* Bản thuyết minh in ra PDF: luôn nền trắng, chụp ngoài màn hình */
 .geo{border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:10px}
 #wm{position:fixed;inset:0;pointer-events:none;z-index:40;background-repeat:repeat;opacity:.07}
-@media print{#wm{opacity:.1}}
 #report{position:absolute;left:-12000px;top:0;width:714px;background:#ffffff;color:#16211f;font:12.5px/1.55 'IBM Plex Sans',Arial,sans-serif;padding:0}
 #report h1{font:700 19px/1.3 'Be Vietnam Pro',Arial,sans-serif;margin:0 0 4px;color:#16211f;text-align:center;text-transform:uppercase}
 #report .rsub{text-align:center;color:#4b5a57;margin:0 0 14px}
@@ -169,7 +168,23 @@ footer .in{max-width:1480px;margin:0 auto;padding-block:16px 24px}
 #report ol,#report ul{margin:4px 0;padding-left:20px}
 #report li{margin:2px 0}
 #report .ok{color:#23784a;font-weight:600} #report .bad{color:#bf3326;font-weight:600}
-#report .sign{margin-top:20px;display:flex;justify-content:space-between;font-size:12px;color:#16211f}
+#report .sign{margin-top:10px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;text-align:center;font-size:12px;color:#16211f}
+#report .tb td{border:1px solid #16211f;padding:5px 8px;font-size:12px}
+#report .tb{margin-bottom:14px}
+#report .pwm{display:none}
+@media print{
+  html.printing body{background:#fff}
+  html.printing body>*:not(#report){display:none!important}
+  html.printing #report{position:static;left:auto;width:auto;display:block}
+  html.printing #report .pwm{display:block;position:fixed;inset:0;width:100%;height:100%;opacity:.08;z-index:0;pointer-events:none}
+  #report h1,#report h2,#report h3{break-after:avoid;page-break-after:avoid}
+  #report h2.pb{break-before:page;page-break-before:always}
+  #report tr,#report .calc,#report .f,#report img,#report .sign,#report li,#report .fig{break-inside:avoid;page-break-inside:avoid}
+  #report img{max-height:105mm;object-fit:contain}
+  #report p{orphans:3;widows:3}
+  #report thead{display:table-header-group}
+  #report td,#report th{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 
 <header><div class="in gut">
@@ -201,6 +216,7 @@ footer .in{max-width:1480px;margin:0 auto;padding-block:16px 24px}
     <div id="g-geo" class="geo"></div>
   </div></details>
   <details class="grp" open><summary><span class="no">04</span>Thời gian &amp; tiêu chuẩn</summary><div class="body" id="g-time"></div></details>
+  <details class="grp"><summary><span class="no">05</span>Thông tin hồ sơ (in trên thuyết minh)</summary><div class="body" id="g-info"></div></details>
 </aside>
 
 <main id="out">
@@ -240,15 +256,15 @@ footer .in{max-width:1480px;margin:0 auto;padding-block:16px 24px}
 
   <section class="card">
     <h2>Thuyết minh tính toán</h2>
-    <p class="cap">Tóm tắt cách tính. Toàn bộ công thức, số liệu thay vào và bảng tính từng mảnh trượt, từng phân lớp nằm trong file PDF.</p>
+    <p class="cap">Tóm tắt cách tính. Toàn bộ công thức, số liệu thay vào và bảng tính từng mảnh trượt, từng phân lớp nằm trong bản in thuyết minh (A4).</p>
     <ul class="howto">
       <li><b>Ổn định:</b> Bishop đơn giản, cung tròn. Đất yếu dùng cu (cắt cánh), cu tăng dần khi đất cố kết. Cọc cát tính theo sức chống cắt hỗn hợp. Vải địa đáy nền đắp góp thêm mô men giữ T·(yO − yv), T lấy nhỏ nhất giữa cường độ thiết kế và sức kháng nhổ.</li>
       <li><b>Tổng độ lún:</b> cộng lún các phân lớp 0,5 m tại tim nền đắp theo Cc, Cs, σ′p; nhân hệ số kinh nghiệm m.</li>
       <li><b>Lún theo thời gian:</b> thấm đứng Terzaghi + thấm ngang vào bấc/cọc cát (Hansbo), có kể thời gian đắp. Lún dư so với 22TCN 262-2000.</li>
     </ul>
     <div class="exp">
-      <button class="btn primary" id="btnPdf" type="button">Tải thuyết minh PDF</button>
-      <span class="st" id="pdfStatus" role="status">Theo phương án và số liệu đang chọn.</span>
+      <button class="btn primary" id="btnPdf" type="button">In thuyết minh / Lưu PDF</button>
+      <span class="st" id="pdfStatus" role="status">Khổ A4, theo phương án và số liệu đang chọn. Nhập tên dự án, công trình, người tính ở mục 05.</span>
     </div>
   </section>
 </main>
@@ -259,5 +275,6 @@ footer .in{max-width:1480px;margin:0 auto;padding-block:16px 24px}
 <div id="report" aria-hidden="true"></div>
 <div id="wm" aria-hidden="true"></div>
 
+<style id="pagestyle"></style>
 <script src="core.js"></script>
 <script src="app.js"></script>
