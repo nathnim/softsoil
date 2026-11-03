@@ -537,9 +537,6 @@ function svgPng(svg){
     img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(str);
   });
 }
-function loadScript(src){
-  return new Promise((res,rej)=>{ if (document.querySelector(`script[src="${src}"]`)) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=()=>rej(new Error('load')); document.head.appendChild(s); });
-}
 
 /* ---------- thông tin hồ sơ ---------- */
 const INFO_FIELDS = [
@@ -610,90 +607,11 @@ async function printReport(){
     btn.disabled = false; document.documentElement.classList.remove('printing');
   }
 }
-function onPrintClick(){
-  // Trong trình xem claude.ai lệnh in bị chặn → dùng cách tạo file PDF; mở trực tiếp (GitHub Pages, máy tính) → in bằng trình duyệt
-  if (window.claude && window.claude.use) exportPdf(); else printReport();
-}
-async function exportPdf(){
-  const btn = $('#btnPdf'), st = $('#pdfStatus');
-  btn.disabled = true; st.textContent = 'Đang lập thuyết minh…';
-  const rep = $('#report');
-  try {
-    const dl = (window.claude && window.claude.use) ? await window.claude.use('downloads').catch(()=>null) : null;
-    if (!dl){ btn.disabled = false; return printReport(); }
-    await Promise.all([
-      loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
-      loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
-    ]);
-    const [imgSec, imgS] = await Promise.all([svgPng($('#sec')), svgPng($('#ch-s'))]);
-    rep.innerHTML = reportHTML(imgSec, imgS);
-    if (document.fonts && document.fonts.ready) await document.fonts.ready;
-    await Promise.all([...rep.querySelectorAll('img')].map(i=>i.decode ? i.decode().catch(()=>{}) : null));
-    st.textContent = 'Đang dựng trang PDF…';
-    const top0 = rep.getBoundingClientRect().top, total = Math.ceil(rep.scrollHeight);
-    const cuts = new Set([total]);
-    rep.querySelectorAll('h2,h3,p,table,tr,img,.f,.calc,li,ul,.sign').forEach(el=>{
-      const pv = el.previousElementSibling;
-      if (pv && (pv.matches('h2,h3,img') || (pv.matches('.rsub')))) return;
-      if (el.matches('tr') && !el.previousElementSibling) return;
-      cuts.add(Math.round(el.getBoundingClientRect().top - top0));
-    });
-    const cutArr = [...cuts].filter(x=>x>0).sort((a,b)=>a-b);
-    const forced = [...rep.querySelectorAll('.pb')].map(el=>Math.round(el.getBoundingClientRect().top - top0)).filter(x=>x>0);
-    const scale = Math.min(2, 32000/total);
-    const canvas = await html2canvas(rep, {scale, backgroundColor:'#ffffff', logging:false, scrollX:0, scrollY:0, windowWidth:1280});
-    const {jsPDF} = window.jspdf;
-    const pdf = new jsPDF({unit:'mm', format:'a4', compress:true});
-    const mx = 14, my = 14, cw = 210-2*mx, chH = 297-2*my-6, mmPx = cw/714, pageH = chH/mmPx;
-    const ranges = []; let y = 0;
-    while (y < total-2){
-      let end = Math.min(total, y+pageH);
-      const fb = forced.filter(f=>f>y+5 && f<end);
-      if (fb.length){ end = fb[0]; ranges.push([y,end]); y = end; continue; }
-      if (end < total){ const ok = cutArr.filter(c=>c>y+pageH*0.35 && c<=y+pageH); if (ok.length) end = ok[ok.length-1]; }
-      ranges.push([y,end]); y = end;
-    }
-    ranges.forEach(([a,b],k)=>{
-      if (k) pdf.addPage();
-      const hpx = Math.max(1, Math.round((b-a)*scale)), pc = document.createElement('canvas');
-      pc.width = canvas.width; pc.height = hpx;
-      const g = pc.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0,0,pc.width,hpx);
-      g.drawImage(canvas, 0, Math.round(a*scale), canvas.width, hpx, 0, 0, canvas.width, hpx);
-      drawWatermark(g, pc.width, hpx, scale);
-      pdf.addImage(pc.toDataURL('image/jpeg', 0.9), 'JPEG', mx, my, cw, (b-a)*mmPx);
-      pdf.setFontSize(8); pdf.setTextColor(110);
-      pdf.text(`${k+1} / ${ranges.length}`, 210-mx, 297-8, {align:'right'});
-    });
-    st.textContent = 'Chờ bạn xác nhận lưu file…';
-    const name = `Thuyet_minh_nen_dap_dat_yeu_${S.method==='pvd'?'bac_tham':S.method==='sand'?'coc_cat':'khong_xu_ly'}.pdf`;
-    await dl.save({filename:name, data:pdf.output('blob')});
-    st.textContent = `Đã lưu ${name} (${ranges.length} trang).`;
-  } catch(e){
-    const code = e && e.code;
-    st.textContent = code==='declined' ? 'Đã hủy lưu file.' : code==='rate_limited' ? 'Đang có một hộp thoại lưu file mở, thử lại sau ít giây.' : 'Không tạo được PDF: ' + (e && (e.message||code) || 'lỗi không rõ');
-  } finally {
-    rep.innerHTML = ''; btn.disabled = false;
-  }
-}
+function onPrintClick(){ printReport(); }
 $('#btnPdf').addEventListener('click', onPrintClick);
 
 /* ===================== HÌNH MỜ TÁC GIẢ ===================== */
 const WM = ['TS. Đặng Minh Tân', 'Bộ môn Đường bộ – Sân bay · Trường ĐH Giao thông Vận tải'];
-function drawWatermark(g, w, h, k){
-  g.save();
-  g.globalAlpha = 0.075; g.fillStyle = '#1b2b3a'; g.textAlign = 'center';
-  const stepX = 430*k, stepY = 230*k;
-  g.translate(w/2, h/2); g.rotate(-24*Math.PI/180);
-  const span = Math.hypot(w, h);
-  for (let y = -span; y < span; y += stepY){
-    const off = (Math.round(y/stepY) % 2) * stepX/2;
-    for (let x = -span; x < span; x += stepX){
-      g.font = `700 ${21*k}px "Be Vietnam Pro", Arial, sans-serif`; g.fillText(WM[0], x+off, y);
-      g.font = `500 ${12.5*k}px "IBM Plex Sans", Arial, sans-serif`; g.fillText(WM[1], x+off, y + 19*k);
-    }
-  }
-  g.restore();
-}
 function paintPageWatermark(){
   const ink = getComputedStyle(document.documentElement).getPropertyValue('--ink').trim() || '#16211f';
   const t = (x)=>x.replace(/&/g,'&amp;').replace(/</g,'&lt;');
